@@ -14,10 +14,14 @@ Websocket_Handler::~Websocket_Handler(){
 }
 
 int Websocket_Handler::process(){
+    //如果没有完成握手先完成握手
 	if(status_ == WEBSOCKET_UNCONNECT){
 		return handshark();
 	}
+	//数据交互
 	request_->fetch_websocket_info(buff_);
+
+	//打印交互过程
 	request_->print();
 	memset(buff_, 0, sizeof(buff_));
 	return 0;
@@ -55,9 +59,11 @@ void Websocket_Handler::parse_str(char *request){
 }
 
 int Websocket_Handler::fetch_http_info(){
+    //用于执行C++风格的串流的输入操作
 	std::istringstream s(buff_);
 	std::string request;
 
+    //读取一行
 	std::getline(s, request);
 	if (request[request.size()-1] == '\r') {
 		request.erase(request.end()-1);

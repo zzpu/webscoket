@@ -6,7 +6,7 @@
 #define PORT 9000
 #define TIMEWAIT 100
 #define BUFFLEN 2048
-#define MAXEVENTSSIZE 20
+#define MAXEVENTSSIZE 100
 
 typedef std::map<int, Websocket_Handler *> WEB_SOCKET_HANDLER_MAP;
 

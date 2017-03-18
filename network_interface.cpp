@@ -46,6 +46,7 @@ int Network_Interface::init(){
 		DEBUG_LOG("Listen socket failed!");
 		return -1;
 	}
+	
 	epollfd_ = epoll_create(MAXEVENTSSIZE);
 
 	ctl_event(listenfd_, true);	
@@ -61,22 +62,28 @@ int Network_Interface::epoll_loop(){
 	int bufflen = 0;
 	struct epoll_event events[MAXEVENTSSIZE];
 	while(true){
+		//等待套接字可读写
 		nfds = epoll_wait(epollfd_, events, MAXEVENTSSIZE, TIMEWAIT);
 		for(int i = 0; i < nfds; i++){
+			//监听套接字有数据
 			if(events[i].data.fd == listenfd_){
 				fd = accept(listenfd_, (struct sockaddr *)&client_addr, &clilen);
 				ctl_event(fd, true);
 			}
+			//客户端套接字有数据
 			else if(events[i].events & EPOLLIN){
 				if((fd = events[i].data.fd) < 0)
 					continue;
 				Websocket_Handler *handler = websocket_handler_map_[fd];
 				if(handler == NULL)
 					continue;
+				//读取数据到缓冲区
 				if((bufflen = read(fd, handler->getbuff(), BUFFLEN)) <= 0){
+					//如果读取出错将套接字从epoll中删除
 					ctl_event(fd, false);
 				}
 				else{
+					//处理数据
 					handler->process();
 				}
 			}
